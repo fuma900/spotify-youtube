@@ -1,0 +1,154 @@
+<html ng-app="app">
+<head>
+	<title>Spotify Playlist Converter</title>
+	<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="loader.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular-sanitize.min.js"></script>
+	<!--	<script src="min/app-min.js"></script>	-->
+	<script type="text/javascript" src="app.js"></script>
+	<script type="text/javascript" src="helper.module.js"></script>
+	<script type="text/javascript" src="spotify.module.js"></script>
+	<script type="text/javascript" src="youtube.module.js"></script>
+	<script type="text/javascript" src="select.min.js"></script>
+	<script src="https://apis.google.com/js/client.js?onload=init"></script>
+	<link rel="stylesheet" type="text/css" href="select.min.css">
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">
+
+	<style type="text/css">
+
+		div {
+			text-align: center;
+		}
+		.col-md-12 {
+			padding: 20px 0 0;
+		}
+		h1, h5, p, a.btn {
+			text-align: center;
+		}
+		.thumbnail > .caption > h5 {
+			min-height: 70px;
+		}
+		.thumbnail > .caption {
+			padding-bottom: 0;
+		}
+		.thumbnail > img {
+			height: 268px;
+			width: 268px;
+		}
+		textarea {
+			min-height: 222px;
+			width: 100%;
+			margin-bottom: 5px;
+		}
+		.thumbnail {
+			padding: 0 0 15px;
+		}
+	</style>
+</head>
+<body>
+<div class="overlay" ng-show="loading">
+	<div class="loader" title="1">
+	  <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	     width="100px" height="100px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+	  <path fill="#000" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
+	    <animateTransform attributeType="xml"
+	      attributeName="transform"
+	      type="rotate"
+	      from="0 25 25"
+	      to="360 25 25"
+	      dur="0.4s"
+	      repeatCount="indefinite"/>
+	    </path>
+	  </svg>
+	</div>
+</div>
+<div class="container">
+	<div ng-controller="appCtrl" class="row">
+		<!-- {{ isLoggedIn }}
+	<button ng-hide="isLoggedIn" class="btn btn-primary" ng-click="login()">LOGIN</button>
+	<a ng-show="isLoggedIn" class="btn btn-primary" href="https://accounts.google.com/logout">Logout</a> -->
+		<div class="col-md-12">
+			<div class="row">
+				<h1>Instructions</h1>
+				<p>Login to spotify then select the playlist you want to play with youtube! (up to 100 songs)</p>
+			</div>
+			<div class="row">
+				<div class="col-md-2 col-md-offset-5" ng-hide="spotify.noLogin || spotify.user">
+					<button ng-click="spotify.login()" class="btn btn-success btn-block btn-lg">Spotify Login</button>
+					<!--
+						<label class="text-muted"><input type="checkbox" ng-model="spotify.noLogin"> Don't want to login</label>
+					-->
+				</div>
+			</div>
+			<div ng-if="spotify.noLogin || spotify.user">
+				<div class="row">
+					<h1 ng-show="nowPlaying">Now Playing: {{ nowPlaying.name }}</h1>
+				</div>
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4">
+						<ui-select ng-model="spotify.nowPlaying" theme="selectize" ng-disabled="disabled" ng-change="spotify.selectPlaylist()">
+							<ui-select-match placeholder="Select or search your playlist...">{{$select.selected.name}}</ui-select-match>
+							<ui-select-choices repeat="playlist in playlists | filter: $select.search">
+								<span ng-bind-html="playlist.name | highlight: $select.search"></span>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+				<div class="row" ng-if="spotify.noLogin || spotify.user">
+					<!--
+					<div class="col-md-6" ng-if="spotify.noLogin">
+						<textarea id="urls" ng-model="urls" ng-change="" class="form-control"></textarea>
+						<button class="btn btn-primary btn-block" ng-click="run()">GO!</button>
+						<button class="btn btn-block" ng-click="reset()">Reset</button>
+					</div>
+					<div class="col-md-6" ng-if="spotify.noLogin">
+						<youtube videoid="youtubeIds" width="youtube.width"></youtube>
+					</div>
+					-->
+					<div class="col-md-12" ng-if="spotify.user">
+						<youtube videoid="youtubeIds"></youtube>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-12" ng-if="spotify.noLogin">
+				<div class="row">
+					<div class="col-md-3" ng-repeat="(key, result) in results">
+					    <div class="thumbnail">
+					    	<img ng-src="{{ result.album.images[1].url }}" alt="...">
+					    	<div class="caption">
+					    		<h5>{{ result.artists }} - {{ result.name }}</h5>
+					    		<div class="row">
+					    			<a target="_blank" ng-href="https://www.youtube.com/watch?v={{ result.youtubeId }}" class="btn btn-danger col-md-4 col-md-offset-1" role="button">Youtube</a>
+					    			<a target="_blank" ng-href="{{ result.spotifyUrl }}" class="btn btn-success col-md-4 col-md-offset-2" role="button">Spotify</a>
+					    		</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--
+			<div class="col-md-12" ng-show="playlists">
+				<div class="row">
+					<h1>Playlists</h1>
+					<div class="col-md-3" ng-repeat="(key, result) in playlists" >
+					    <div class="thumbnail" href ng-click="spotify.selectPlaylist(key)">
+					    		<img ng-if="result.images[0]" ng-src="{{ result.images[0].url }}" alt="...">
+					    		<img ng-if="!result.images[0]" ng-src="http://placehold.it/500&text=no+image" alt="...">
+					    	<div class="caption">
+					    		<h5>{{ result.name }}</h5>
+					    		<div class="row">
+					    		</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			-->
+		</div>
+		<p>{{ prova }}</p>
+	</div>
+</div>
+</body>
+</html>
