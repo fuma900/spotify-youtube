@@ -1,8 +1,7 @@
-var services = angular.module('helperModule', []);
+var helperModule = angular.module('helperModule', []);
 
-services.service('Helper', ['$q', function($q) {
+helperModule.service('Helper', ['$q', function($q) {
 	this.parseHashbangResponse = function(path) {
-		console.log(path);
 		var path = path || '';
 		if (path.split('/').length !== 2){ return false; }
 		if (path.split('/')[1] === '') {return false; }
@@ -12,6 +11,17 @@ services.service('Helper', ['$q', function($q) {
 			'token_type': 	frag[1].split('=')[1],
 			'expires_in': 	frag[2].split('=')[1],
 		}
+	};
+
+	this.urlWithParams = function(url, params) {
+		var i = 0;
+		var s = '';
+		angular.forEach(params, function(v,k) {
+			if (i===0){s+='?';} else if (i>0){s+='&'}
+			s += k + '=' + v;
+			i += 1;
+		});
+		return url + s;
 	};
 
 	this.extractSpotifyId = function (urls){

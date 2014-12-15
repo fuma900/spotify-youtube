@@ -1,6 +1,15 @@
-var services = angular.module('youtubeModule', ['helperModule']);
+var youtubeModule = angular.module('youtubeModule', ['helperModule']);
 
-services.service('Youtube', ['$q', '$window', 'Helper', function($q, $window, Helper) {
+youtubeModule.constant('YoutubeEvents', {
+    STOP:            0, 
+    PLAY:            1,
+    PAUSE:           2,
+    NEXT:            3,
+    PREVIOUS:        4,
+    CHANGE:          5,
+});
+
+youtubeModule.service('Youtube', ['$q', '$window', 'Helper', function($q, $window, Helper) {
 
 	this.clientId = '743605158714-vfjtaobdqlgshs7157r43e1ohntdkbe6.apps.googleusercontent.com';
 	this.scopes = 'https://www.googleapis.com/auth/youtube';
@@ -128,14 +137,16 @@ services.service('Youtube', ['$q', '$window', 'Helper', function($q, $window, He
 	};
 }]);
 
-services.directive('youtube', ['$window', function($window) {
+youtubeModule.directive('youtube', ['$window', 'YoutubeEvents', function($window, YoutubeEvents) {
   return {
     restrict: "E",
 
     scope: {
-      height: "@",
-      width: "@",
-      videoid: "="
+      height: "=",
+      width: "=",
+      videoid: "=",
+      current: "=",
+      time: "="
     },
 
     template: '<div></div>',
@@ -149,6 +160,7 @@ services.directive('youtube', ['$window', function($window) {
       var player;
 
       $window.onYouTubeIframeAPIReady = function() {
+        scope.videoid = scope.videoid || [];
 
         player = new YT.Player(element.children()[0], {
           playerVars: {
@@ -162,31 +174,56 @@ services.directive('youtube', ['$window', function($window) {
             controls: 1,
             // playlist: scope.videoid.join(),
           },
-          height: 400,
-          width: 1140,
+          height: scope.height,
+          width: scope.width,
         });
-
       }
 
       scope.$watch('videoid', function(newValue, oldValue) {
-        if (newValue == oldValue || newValue === '' || newValue === []) {
+        if (newValue == oldValue || newValue == '' || newValue == [] || !newValue) {
           return;
         }
-
-        console.log(newValue);
         player.loadPlaylist({
         	playlist: scope.videoid,
         });
 
-      }); 
+      });
 
-      scope.$watch('height + width', function(newValue, oldValue) {
-        if (newValue == oldValue) {
-          return;
-        }
+      scope.$watch('width + height', function(newValue, oldValue) {
+        console.info('setting new player size W:' + scope.width + ' H:' + scope.height);
+        if (newValue == oldValue) { return; }
 
         player.setSize(scope.width, scope.height);
+      });
 
+      scope.$on(YoutubeEvents.STOP, function () {
+        player.seekTo(0);
+        player.stopVideo();
+      });
+
+      scope.$on(YoutubeEvents.PLAY, function () {
+        if (player.getPlayerState() === 1) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      }); 
+
+      scope.$on(YoutubeEvents.PAUSE, function () {
+        player.pauseVideo();
+      });
+
+      scope.$on(YoutubeEvents.NEXT, function () {
+        player.nextVideo();
+        
+      }); 
+
+      scope.$on(YoutubeEvents.PREVIOUS, function () {
+        player.previousVideo();
+      });
+
+      scope.$on(YoutubeEvents.CHANGE, function (event, args) {
+        player.playVideoAt(args.key);
       });
     }  
   };

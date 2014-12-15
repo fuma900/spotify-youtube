@@ -1,0 +1,50 @@
+doctype html
+html(ng-app='app')
+	head
+		title Spotify Playlist Converter
+		meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0")
+		link(rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css")
+		link(rel="stylesheet" type="text/css" href="style.min.css")
+		script(src="app.min.js")
+		script(src="https://apis.google.com/js/client.js?onload=init")
+	body(ng-keydown="youtube.sendEvent($event)")
+		.overlay(ng-show="loading")
+
+			.loader.
+				<svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+				width="100px" height="100px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+					<path fill="#000" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
+						<animateTransform attributeType="xml"
+						attributeName="transform"
+						type="rotate"
+						from="0 25 25"
+						to="360 25 25"
+						dur="0.4s"
+						repeatCount="indefinite"/>
+					</path>
+				</svg>
+
+		div(ng-controller="appCtrl")
+
+			.container#login(ng-hide="spotify.noLogin || spotify.user")
+				.row
+					.col-md-12
+						p Login to spotify then select the playlist you want to play with youtube! (up to 100 songs)
+				.row
+					.col-md-12
+						img.loginbutton(src="img/login.png" ng-click="spotify.login()")
+
+			.container#top(ng-if="spotify.noLogin || spotify.user")
+				.row
+					.col-md-4.col-md-offset-4.col-xs-10.col-xs-offset-1.col-sm-8.col-sm-offset-2
+						//- <ui-select ng-model="spotify.nowPlaying" theme="selectize" ng-disabled="disabled" ng-change="spotify.selectPlaylist()">
+						//- 	<ui-select-match placeholder="Select or search your playlist...">{{$select.selected.name}}</ui-select-match>
+						//- 	<ui-select-choices repeat="playlist in playlists | filter: $select.search">
+						//- 		<span ng-bind-html="playlist.name | highlight: $select.search"></span>
+						//- 	</ui-select-choices>
+						//- </ui-select>
+						select.form-control(ng-change="spotify.selectPlaylist()" ng-model="spotify.nowPlaying" ng-options="playlist.name for playlist in playlists")
+							option(value="") Select or search your playlist...
+
+			.youtubePlayer(ng-if="spotify.user")
+				youtube(videoid="youtube.videos" width="youtube.playerWidth" height="youtube.playerHeight")
