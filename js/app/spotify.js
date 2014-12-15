@@ -22,7 +22,7 @@ spotifyModule.service('Spotify', ['$rootScope', '$q', '$http', 'Helper', '$locat
 		} else if ($location.absUrl().split(':')[1] === '//192.168.2.66') {
 			var redirect_uri = 'http://192.168.2.66:5757';
 		} else {
-			var redirect_uri = 'http://fuma900.github.io/spotifyToYoutubePlaylist'
+			var redirect_uri = 'http://fuma900.github.io/spotify-youtube'
 		}
 
 		var params = {
