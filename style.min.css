@@ -1,0 +1,81 @@
+body {
+  background-color: #000000;
+}
+div {
+  text-align: center;
+}
+#login {
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  margin-top: -60px;
+}
+#login img {
+  max-width: 300px;
+}
+h1,
+h5,
+p,
+a.btn {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #CCC;
+}
+.thumbnail > .caption > h5 {
+  min-height: 70px;
+}
+.thumbnail > .caption {
+  padding-bottom: 0;
+}
+.thumbnail > img {
+  height: 268px;
+  width: 268px;
+}
+textarea {
+  min-height: 222px;
+  width: 100%;
+  margin-bottom: 5px;
+}
+.thumbnail {
+  padding: 0 0 15px;
+}
+.loginbutton {
+  text-align: center;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.youtubePlayer {
+  width: 100%;
+}
+#top select {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #648f00;
+  border: 0;
+  box-shadow: 0;
+  color: #FFFFFF;
+}
+.overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  position: absolute;
+}
+.loader {
+  left: 50%;
+  margin: -50px;
+  position: absolute;
+  top: 50%;
+  z-index: 101;
+}
+svg path,
+svg rect {
+  fill: #648f00;
+}
+.loader {
+  text-align: center;
+  padding: 1em;
+  display: inline-block;
+  vertical-align: top;
+}
