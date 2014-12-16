@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html ng-app="app">
   <head>
-    <title>Spotify Playlist Converter</title>
+    <title>SpotiYou</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link href="http://fonts.googleapis.com/css?family=Oxygen:300" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="style.min.css">
     <script src="app.min.js"></script>
@@ -11,17 +12,57 @@
   <body ng-keydown="youtube.sendEvent($event)">
     <div ng-show="loading" class="overlay">
       <div class="loader">
-        <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-        width="100px" height="100px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-        	<path fill="#000" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
-        		<animateTransform attributeType="xml"
-        		attributeName="transform"
-        		type="rotate"
-        		from="0 25 25"
-        		to="360 25 25"
-        		dur="0.4s"
-        		repeatCount="indefinite"/>
-        	</path>
+        <svg width="135" height="140" viewBox="0 0 135 140" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+            <rect y="10" width="15" height="120" rx="6">
+                <animate attributeName="height"
+                     begin="0.5s" dur="1s"
+                     values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear"
+                     repeatCount="indefinite" />
+                <animate attributeName="y"
+                     begin="0.5s" dur="1s"
+                     values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear"
+                     repeatCount="indefinite" />
+            </rect>
+            <rect x="30" y="10" width="15" height="120" rx="6">
+                <animate attributeName="height"
+                     begin="0.25s" dur="1s"
+                     values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear"
+                     repeatCount="indefinite" />
+                <animate attributeName="y"
+                     begin="0.25s" dur="1s"
+                     values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear"
+                     repeatCount="indefinite" />
+            </rect>
+            <rect x="60" width="15" height="140" rx="6">
+                <animate attributeName="height"
+                     begin="0s" dur="1s"
+                     values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear"
+                     repeatCount="indefinite" />
+                <animate attributeName="y"
+                     begin="0s" dur="1s"
+                     values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear"
+                     repeatCount="indefinite" />
+            </rect>
+            <rect x="90" y="10" width="15" height="120" rx="6">
+                <animate attributeName="height"
+                     begin="0.25s" dur="1s"
+                     values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear"
+                     repeatCount="indefinite" />
+                <animate attributeName="y"
+                     begin="0.25s" dur="1s"
+                     values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear"
+                     repeatCount="indefinite" />
+            </rect>
+            <rect x="120" y="10" width="15" height="120" rx="6">
+                <animate attributeName="height"
+                     begin="0.5s" dur="1s"
+                     values="120;110;100;90;80;70;60;50;40;140;120" calcMode="linear"
+                     repeatCount="indefinite" />
+                <animate attributeName="y"
+                     begin="0.5s" dur="1s"
+                     values="10;15;20;25;30;35;40;45;50;0;10" calcMode="linear"
+                     repeatCount="indefinite" />
+            </rect>
         </svg>
         
       </div>
@@ -41,7 +82,7 @@
         <div class="row">
           <div class="col-md-4 col-md-offset-4 col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2">
             <select ng-change="spotify.selectPlaylist()" ng-model="spotify.nowPlaying" ng-options="playlist.name for playlist in playlists" class="form-control">
-              <option value="">Select or search your playlist...</option>
+              <option value="">Select your playlist...</option>
             </select>
           </div>
         </div>
