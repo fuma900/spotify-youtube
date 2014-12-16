@@ -119,21 +119,19 @@ youtubeModule.service('Youtube', ['$q', '$window', 'Helper', function($q, $windo
 				part: 'id'
 			});
 			request.then(function(response) {
+        deferred.notify(true);
 				deferred.resolve(response);
-			});	
+			});
 		});
 		return deferred.promise;
 	};
 
 	this.searchVideos = function(tracks) {
-		var responses = [];
-		angular.forEach(tracks, function(track){
-			this.searchVideo(track)
-			.then(function(response) {
-				responses.push(response);
-			});
-		});
-		return $q.when(responses);
+    var promises = [];
+		angular.forEach(tracks, function(track, i){
+      promises.push(this.searchVideo(track));
+    }, this);
+    return $q.all(promises);
 	};
 }]);
 

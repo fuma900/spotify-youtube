@@ -50,10 +50,11 @@ app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location',
 		$rootScope.spotify.noLogin = false;
 
 		($scope.setPlayerSize = function() {
-			var top = 58;
-			$rootScope.youtube.playerWidth = verge.viewportW();
+			var top = 56;
+			var margin = 30;
+			$rootScope.youtube.playerWidth = verge.viewportW() - margin*2;
 			// if (Math.round(verge.viewportW()*9/16) > verge.viewportH()) {
-				$rootScope.youtube.playerHeight = verge.viewportH() - top;
+				$rootScope.youtube.playerHeight = verge.viewportH() - top - margin;
 			// } else {
 			// 	$rootScope.youtube.playerHeight = Math.round($rootScope.youtube.playerWidth*9/16);
 			// }
@@ -140,17 +141,17 @@ app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location',
 		***	METODI YOUTUBE
 		*/
 
-		$scope.youtube.login = function() {
-			Youtube.login()
-			.then(function(results) {
-				$rootScope.youtube.user = true;
-			}, function(error) {
-				$rootScope.error = error;
-			});
-		};
+		// $scope.youtube.login = function() {
+		// 	Youtube.login()
+		// 	.then(function(results) {
+		// 		$rootScope.youtube.user = true;
+		// 	}, function(error) {
+		// 		$rootScope.error = error;
+		// 	});
+		// };
 
 		$scope.youtube.searchVideos = function(tracks, retry) {
-			var promises = [];
+			$rootScope.youtube.loaded = 0;
 			var youtubeIds = [];
 			retry = retry || 0;
 
@@ -159,27 +160,28 @@ app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location',
 				return;
 			}
 
-			angular.forEach(tracks, function(track, i){
-				promises.push(Youtube.searchVideo(track));
-			});
-			$q.all(promises)
-			.then(function(response) {
-				console.log(response);
-				angular.forEach(tracks, function(track, i){
-					tracks[i].youtubeId = response[i].result.items[0].id.videoId;
-					youtubeIds.push(tracks[i].youtubeId);
-				});
-				$scope.results = tracks;
-				$scope.youtube.videos = youtubeIds;
-				$rootScope.loading = false;
-			})
+			Youtube.searchVideos(tracks)
+			.then(
+				function(response) {
+					console.log(response);
+					angular.forEach(tracks, function(track, i){
+						tracks[i].youtubeId = response[i].result.items[0].id.videoId;
+						youtubeIds.push(tracks[i].youtubeId);
+					});
+					$scope.results = tracks;
+					$scope.youtube.videos = youtubeIds;
+					$rootScope.loading = false;
+				}, function(error) {
+
+				}, function(update) {
+					$rootScope.youtube.loaded += 1;
+					console.log('loaded: ' + $rootScope.youtube.loaded + '/' + tracks.length);
+				})
 			.catch(function(error) {
 				// if failed try again
 				$scope.youtube.searchVideos(tracks, retry + 1);
 			});
 		};
-
-		$scope.YoutubeEvents = YoutubeEvents;
 
 		$scope.youtube.sendEvent = function (e, args) {
 			args = args || {};
