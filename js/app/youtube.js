@@ -9,7 +9,7 @@ youtubeModule.constant('YoutubeEvents', {
     CHANGE:          5,
 });
 
-youtubeModule.service('Youtube', ['$q', '$window', 'Helper', function($q, $window, Helper) {
+youtubeModule.service('Youtube', ['$q', '$window', '$log', 'Helper', function($q, $window, $log, Helper) {
 
 	this.clientId = '743605158714-vfjtaobdqlgshs7157r43e1ohntdkbe6.apps.googleusercontent.com';
 	this.scopes = 'https://www.googleapis.com/auth/youtube';
@@ -105,7 +105,7 @@ youtubeModule.service('Youtube', ['$q', '$window', 'Helper', function($q, $windo
 			}
 		} else {
 			Helper.sleep(2000);
-			console.info('waiting for Google API to be loaded');
+			$log.debug('waiting for Google API to be loaded');
 			this.loadApi(callback);
 		}
 	};
@@ -113,10 +113,14 @@ youtubeModule.service('Youtube', ['$q', '$window', 'Helper', function($q, $windo
 	this.searchVideo = function(track) {
 		var deferred = $q.defer();
 		this.loadApi(function() {
-			var q = track.artists + " " + track.name;
+			var q = track.artists + " - " + track.name;
 			var request = gapi.client.youtube.search.list({
 				q: q,
-				part: 'id'
+				part: 'id, snippet',
+        regionCode: 'it',
+        type: 'video',
+        videoEmbeddable: 'true',
+        fields: 'items(id,snippet)',
 			});
 			request.then(function(response) {
         deferred.notify(true);
@@ -135,7 +139,7 @@ youtubeModule.service('Youtube', ['$q', '$window', 'Helper', function($q, $windo
 	};
 }]);
 
-youtubeModule.directive('youtube', ['$window', 'YoutubeEvents', function($window, YoutubeEvents) {
+youtubeModule.directive('youtube', ['$window', '$log', 'YoutubeEvents', function($window, $log, YoutubeEvents) {
   return {
     restrict: "E",
 
@@ -188,7 +192,7 @@ youtubeModule.directive('youtube', ['$window', 'YoutubeEvents', function($window
       });
 
       scope.$watch('width + height', function(newValue, oldValue) {
-        console.info('setting new player size W:' + scope.width + ' H:' + scope.height);
+        $log.debug('setting new player size W:' + scope.width + ' H:' + scope.height);
         if (newValue == oldValue) { return; }
 
         player.setSize(scope.width, scope.height);

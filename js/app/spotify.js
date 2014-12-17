@@ -1,6 +1,6 @@
 var spotifyModule = angular.module('spotifyModule', ['helperModule']);
 
-spotifyModule.service('Spotify', ['$rootScope', '$q', '$http', 'Helper', '$location', function($rootScope, $q, $http, Helper, $location) {
+spotifyModule.service('Spotify', ['$rootScope', '$log', '$q', '$http', 'Helper', '$location', function($rootScope, $log, $q, $http, Helper, $location) {
 	this.accessToken = function() {
 
 	};
@@ -61,7 +61,6 @@ spotifyModule.service('Spotify', ['$rootScope', '$q', '$http', 'Helper', '$locat
 
 	this.getUserPlaylistSongs = function(url) {
 		if (url.split('/')[4] === 'me') {
-			console.log(url.split('/')[4]);
 			return this.getUserSongs(url);
 		}
 		return $http.get(url, {

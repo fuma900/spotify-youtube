@@ -13,8 +13,12 @@ app.constant('YoutubeEvents', {
     CHANGE: 		 5,
 });
 
-app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location','Spotify', 'Youtube', 'Helper', 'YoutubeEvents',
-	function($scope, $rootScope, $q, $window, $location, Spotify, Youtube, Helper, YoutubeEvents) {
+app.config(['$logProvider',function($logProvider) {
+	$logProvider.debugEnabled(true);
+}])
+
+app.controller('appCtrl', ['$scope', '$rootScope', '$log', '$q', '$window', '$location','Spotify', 'Youtube', 'Helper', 'YoutubeEvents',
+	function($scope, $rootScope, $log, $q, $window, $location, Spotify, Youtube, Helper, YoutubeEvents) {
 		
 		$scope.gapiReady = false;
 		$scope.isLoggedIn = false;
@@ -97,14 +101,14 @@ app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location',
 			Spotify.getUser()
 			.then(function(me) {
 				me = me.data;
-				console.log(me);
+				$log.debug('User', me);
 				return Spotify.getUserPlaylists(me);
 			})
 			.then(function(playlists) {
 				playlists = playlists.data;
 				$scope.playlists = playlists.items;
 				$scope.playlists.unshift(userLibrary);
-				console.log($scope.playlists);
+				$log.debug('Playlists Loaded!', $scope.playlists);
 				$rootScope.loading = false;
 			})
 			.catch(function(error) {			
@@ -128,7 +132,6 @@ app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location',
 			Spotify.getUserPlaylistSongs(tracksUrl)
 			.then(function(tracks) {
 				tracks = tracks.data;
-				console.log(tracks);
 				return Helper.getTracksInfo(tracks, 1);
 			})
 			.then(function(tracks) {
@@ -156,27 +159,32 @@ app.controller('appCtrl', ['$scope', '$rootScope', '$q', '$window', '$location',
 			retry = retry || 0;
 
 			if (retry > 3){
-				console.log('There is a problem connecting to Youtube...');
+				$log.debug('There is a problem connecting to Youtube...');
 				return;
 			}
 
 			Youtube.searchVideos(tracks)
-			.then(
-				function(response) {
-					console.log(response);
-					angular.forEach(tracks, function(track, i){
-						tracks[i].youtubeId = response[i].result.items[0].id.videoId;
-						youtubeIds.push(tracks[i].youtubeId);
-					});
-					$scope.results = tracks;
-					$scope.youtube.videos = youtubeIds;
-					$rootScope.loading = false;
-				}, function(error) {
-
-				}, function(update) {
-					$rootScope.youtube.loaded += 1;
-					console.log('loaded: ' + $rootScope.youtube.loaded + '/' + tracks.length);
-				})
+			.then(function(response) {
+				$log.debug('Youtube Videos Loaded!', response);
+				angular.forEach(tracks, function(track, i){
+					var bestMatch = []; // to be populated with youtube ID
+					var items = response[i].result.items;
+					angular.forEach(items, function(item, i) {
+						var test = Helper.bestMatch(item.snippet);
+						if (test === 2) {
+							this.unshift(item.id.videoId);
+						} else if (test === 1) {
+							this.push(item.id.videoId);
+						}
+					}, bestMatch);
+					if (bestMatch.length === 0) { bestMatch.push(items[0].id.videoId); }
+					tracks[i].youtubeId = response[i].result.items[0].id.videoId;
+					youtubeIds.push(bestMatch[0]);
+				});
+				$scope.results = tracks;
+				$scope.youtube.videos = youtubeIds;
+				$rootScope.loading = false;
+			})
 			.catch(function(error) {
 				// if failed try again
 				$scope.youtube.searchVideos(tracks, retry + 1);

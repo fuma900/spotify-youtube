@@ -1,6 +1,8 @@
 var helperModule = angular.module('helperModule', []);
 
-helperModule.service('Helper', ['$q', function($q) {
+helperModule.service('Helper', ['$q', '$log', function($q, $log) {
+
+	// Parse the response from url after spotify login (which return an hashbang response)
 	this.parseHashbangResponse = function(path) {
 		var path = path || '';
 		if (path.split('/').length !== 2){ return false; }
@@ -13,6 +15,7 @@ helperModule.service('Helper', ['$q', function($q) {
 		}
 	};
 
+	// Generate a url from a baseUrl and some GET parameters
 	this.urlWithParams = function(url, params) {
 		var i = 0;
 		var s = '';
@@ -22,31 +25,6 @@ helperModule.service('Helper', ['$q', function($q) {
 			i += 1;
 		});
 		return url + s;
-	};
-
-	this.extractSpotifyId = function (urls){
-		var ids = [];
-		urls = urls.split(/\n/);
-
-		angular.forEach(urls, function(url){
-			var type = 0;							// 0: not set, 1: http, 2: spotify uri
-			var a = url.trim().split(':');			// Split lines and remove whitespaces
-			// Check if the url is http link or spotify uri
-			type = (a[0] === 'http') ? ( 
-					1
-				) : (
-					(a[0] === 'spotify')?2:0
-				);
-			if (type === 0){
-				console.log('Url ' + url.trim() + ' is not valid!');
-			} else {
-				var id = a[a.length - 1].split('/');
-				id = id[id.length - 1];
-				ids.push(id);
-			}
-		});
-
-		return ids;
 	};
 
 	// Get tracks from the Spotify Web API and simplify the result to make it easier in the frontend
@@ -93,6 +71,46 @@ helperModule.service('Helper', ['$q', function($q) {
 		return $q.when(temp);
 	};
 
+	// Test youtube result to find the best one based on title and channel name
+	this.bestMatch = function(snippet) {
+		var title = {};
+		var channel = {};
+		var result = 0;
+
+		title.name = snippet.title;
+		channel.name = snippet.channelTitle;
+
+		// Tests on Title
+		title.blacklist = [
+			'cover', 'tribute', 'mix'
+		];
+		title.whitelist = [
+			'official'
+		];
+		title.regexpBlacklist = new RegExp(title.blacklist.join("|"), 'i');
+		title.regexpWhitelist = new RegExp(title.whitelist.join("|"), 'i');
+
+		// Tests on channelName
+		channel.whitelist = [
+			'vevo'
+		];
+		channel.regexpWhitelist = new RegExp(channel.whitelist.join("|"), 'i');
+
+		/* 
+			Excecute tests
+			0: not good; 1: might be good; 2: is good;
+		*/
+		if (title.regexpBlacklist.test(title.name)) {
+			$log.debug(title.name, title.regexpBlacklist.test(title.name));
+			return 0;
+		} else if (channel.regexpWhitelist.test(channel.name)){
+			return 2;
+		} else {
+			return 1;
+		}
+	};
+
+	// Utility to simulate a delay
 	this.sleep = function (milliseconds) {
 	  var start = new Date().getTime();
 	  for (var i = 0; i < 1e7; i++) {
